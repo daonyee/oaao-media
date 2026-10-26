@@ -1,0 +1,26 @@
+# 댓글 키워드 → DM 가이드 자동 발송. 10분마다(GitHub 사정으로 늦을 수 있음) 최근 7일 게시물 댓글을 확인합니다.
+# 필요한 저장소 Secrets: IG_ACCESS_TOKEN, IG_USER_ID (oaao-cardnews의 scripts/setup-cloud-post.ps1이 설정)
+name: OAAO 댓글 DM
+on:
+  schedule:
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: dm-reply
+  cancel-in-progress: false
+jobs:
+  reply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: 댓글 확인과 DM 발송
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+        run: node scripts/dm-reply.mjs
